@@ -1,0 +1,233 @@
+PROGRAM list
+ 
+{  Copyright(C) 2020    MEJT
+ 
+   Linked list manipulation.
+ 
+   This  program is free software: you can redistribute it and/or modify  it
+   under  the  terms of the GNU General Public License as published  by  the
+   Free  Software  Foundation, either version 3 of the License, or (at  your
+   option) any later version.
+ 
+   This  program  is  distributed in the hope that it will  be  useful,  but
+   WITHOUT   ANY   WARRANTY;   without  even   the   implied   warranty   of
+   MERCHANTABILITY  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+   Public License for more details.
+ 
+   You  should have received a copy of the GNU General Public License  along
+   with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+   25 May 87 0.1  001 - Initial version - MEJT
+   06 Aug 12 0.2  002 - Tidied  up  the code and added an  alternative  sort
+                        function using insert - MEJT
+   08 Feb 20      003 - Names held in arrays instead of being entered by the
+                        user - MEJT
+   
+}
+ 
+BEGIN
+ 
+   MODE LIST = STRUCT (REF LIST link, STRING data);
+ 
+   REF LIST empty = NIL;  { Define a nil pointer as an empty list. }
+   REF LIST list := empty;  { Define a new list, initially empty. }
+   REF LIST new := empty;  { Will hold a new copy of the original list. }
+ 
+   [] STRING names   = ("Michael", "Lisa", "John", "Mary", "David",
+                        "James", "Karen", "Robert", "Linda", "Mark", 
+                        "Patricia", "William", "Deborah", "Richard", 
+                        "Elizabeth");
+ 
+   [] STRING removed =  ("Lisa", "John", "Mary", "Mark", "Richard", 
+                        "Patricia", "Deborah", "David", "Elizabeth",
+                        "James", "Karen", "Robert", "Linda");
+
+   [] STRING updated =  ("Alexander");
+ 
+   STRING data;  { String to hold data entered by the user. }
+  
+   PROC add = (REF REF LIST list, STRING data)VOID:
+ 
+   {  Recursive procedure to add an element to the end of the list. }
+ 
+   BEGIN
+      IF list IS empty THEN
+         list := HEAP LIST := (empty, data)
+      ELSE
+         add (link OF list, data)
+      FI
+   END;
+ 
+   PROC delete = (REF REF LIST list, STRING data)VOID:
+ 
+   {  Recursive procedure to remove an element to the list. }
+ 
+   BEGIN
+      IF list ISNT empty THEN
+         IF data OF list = data THEN 
+            list := link OF list
+         ELSE
+            delete (link OF list, data)
+         FI
+      FI
+   END;
+ 
+   PROC insert = (REF REF LIST list, STRING data)VOID:
+ 
+   {  Recursive procedure to insert an element in to the list in alphabetical order. }
+ 
+   BEGIN
+      IF list IS empty THEN
+         list := HEAP LIST := (empty, data)
+      ELSE
+         IF data < data OF list THEN 
+            list := HEAP LIST := (list, data)
+         ELSE
+            insert (link OF list, data)
+         FI
+      FI
+   END; {insert}
+ 
+   PROC copy  = (REF REF LIST list, new)VOID:
+ 
+   {  Recursive procedure to copy a linked list. }
+ 
+   BEGIN
+      IF list ISNT empty THEN
+         new := HEAP LIST := (empty, data OF list);
+         copy (link OF list, link OF new)
+      FI
+   END; {copy}
+ 
+   PROC reverse  = (REF REF LIST list, new)VOID:
+ 
+   {  Recursive procedure to prodice a reversed list. }
+ 
+   BEGIN
+      IF list ISNT empty THEN
+         new := HEAP LIST := (new, data OF list);
+         reverse (link OF list, new)
+      FI
+   END; {reverse}
+ 
+   PROC show = (REF REF LIST list)VOID:
+ 
+   {  Recursive procedure to display a linked list. }
+ 
+   BEGIN
+      IF list ISNT empty THEN
+         print ((data OF list, ", "));
+         show (link OF list)
+      ELSE
+         print (newline)
+      FI
+   END; {show}
+ 
+   PROC sort  = (REF REF LIST list, new)VOID:
+ 
+   {  Procedure to produce a sorted list - using insert. }
+ 
+   BEGIN
+      IF list ISNT empty THEN
+         insert (new, data OF list);
+         sort (link OF list, new)
+      FI
+   END; {sort}
+ 
+   {  Alternative procedure to sort the contents of a linked list. 
+ 
+   BEGIN
+      STRING data;
+      IF list ISNT empty THEN
+         IF link OF list ISNT empty THEN 
+            IF data OF list > data OF link OF list THEN 
+               data := data OF list;
+               data OF list := data OF link OF list;
+               data OF link OF list := data;
+               sort (list)
+            ELSE
+               sort (link OF list);
+               IF data OF list > data OF link OF list THEN 
+                  sort (list)
+               FI
+            FI
+         FI   
+      FI
+   END; } {sort}
+ 
+ 
+{  print (("*** Insert into list", newline));
+   WHILE (read ((data,newline)); data /= "") DO
+      insert (list, data);
+      show (list)
+   OD; }
+ 
+   FOR count FROM 1 TO UPB names DO
+      print ((names[count],", "));
+      add (list, names[count])
+   OD;
+   print (newline); 
+ 
+   print (("*** Original list", newline)); 
+   show (list);
+ 
+   { Sort the original linked list into a new sorted list. }
+ 
+   new := empty;
+   sort (list, new);
+   print (("*** Sorted list", newline)); 
+   show (new);                                              
+
+   print (("*** Original list", newline)); 
+   show (list);
+ 
+   { Reverse the original linked list. }
+ 
+   new := empty;
+   reverse (list, new);
+   print (("*** Reversed list", newline)); 
+   show (new);
+ 
+   print (("*** Original list", newline)); 
+   show (list);
+ 
+   { Create a copy of the original linked list. }
+ 
+   new := empty;
+   copy (list, new);
+   print (("*** Copied list", newline)); 
+   show (new);
+ 
+   print (("*** Delete from list", newline));
+{  WHILE (read ((data,newline)); data /= "") DO
+      delete (list, data);
+      show (list)
+   OD}
+
+   FOR count FROM 1 TO UPB removed DO
+      print ((removed[count],", "));
+      delete (list, removed[count])
+   OD;
+   print (newline); 
+
+   print (("*** Original list", newline)); 
+   show (list);
+  
+  print (("*** Insert into list", newline));
+{  WHILE (read ((data,newline)); data /= "") DO
+      insert (list, data);
+      show (list)
+   OD; }
+ 
+   FOR count FROM 1 TO UPB updated DO
+      print ((updated[count],", "));
+      insert (list, updated[count])
+   OD;
+   print (newline); 
+ 
+   print (("*** Original list", newline)); 
+   show (list)
+ 
+END
+ 
+FINISH.
