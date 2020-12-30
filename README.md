@@ -1,4 +1,4 @@
-## alg-list - An array of strings.
+## alg-list - The classic linked list problem.
 
 Written in Algol 68. 
 
