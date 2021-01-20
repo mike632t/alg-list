@@ -9,8 +9,6 @@ I first wrote it!
 On VAX/VMS compile using:
   
    $ algol alg-list
-   
    $ link alg-list
-   
    $ run alg-list
 
